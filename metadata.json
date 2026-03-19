@@ -1,0 +1,5 @@
+{
+  "name": "TasteHack",
+  "description": "Reverse-engineer your favorite restaurant dishes into home-cooked recipes using AI.",
+  "requestFramePermissions": []
+}
