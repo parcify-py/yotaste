@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logo from '../img.png';
 import { GoogleGenAI, Type } from '@google/genai';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChefHat, Utensils, Clock, Flame, Search, Loader2, Store, AlertTriangle, CheckCircle2, ArrowRight, Play, X, ChevronRight, ChevronLeft, Leaf, Timer, Pause, RotateCcw, Crown, Star, Image as ImageIcon, User, LogOut, LogIn } from 'lucide-react';
@@ -340,15 +341,7 @@ export default function App() {
         <div className="max-w-6xl mx-auto px-4 h-28 flex items-center justify-between relative">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-16 h-16 rounded-2xl bg-stone-900 flex items-center justify-center">
-                <div className="w-11 h-11 rounded-xl bg-[#ff4e3a] flex items-center justify-center">
-                  <ChefHat className="w-7 h-7 text-white" />
-                </div>
-              </div>
-              <div className="flex flex-col leading-none">
-                <span className="text-3xl font-black tracking-tighter uppercase text-stone-900">YO,</span>
-                <span className="text-3xl font-black tracking-tighter uppercase text-[#ff4e3a]">TASTE</span>
-              </div>
+              <img src={logo} alt="YO, TASTE Logo" className="h-24 w-auto" />
             </div>
           </div>
           
