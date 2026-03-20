@@ -6,12 +6,18 @@ import { JSONFilePreset } from 'lowdb/node';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-dotenv.config({ path: '.env.local' });
+dotenv.config();
+dotenv.config({ path: '.env.local', override: true });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+console.log('Stripe key defined:', !!process.env.STRIPE_SECRET_KEY);
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+if (!stripeKey) {
+    console.error('STRIPE_SECRET_KEY is not defined. Please check your .env or .env.local file.');
+}
+const stripe = new Stripe(stripeKey || 'sk_test_mock');
 
 const app = express();
 app.use(express.json());

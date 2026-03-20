@@ -19,6 +19,7 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/package*.json ./
 COPY --from=build /app/server ./server
 COPY --from=build /app/node_modules ./node_modules
+COPY .env.local .env.local
 
 # Create db directory
 RUN mkdir -p /app/server/db
