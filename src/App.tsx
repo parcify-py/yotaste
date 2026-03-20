@@ -136,18 +136,31 @@ export default function App() {
   const [favorites, setFavorites] = useState<Recipe[]>([]);
   const [history, setHistory] = useState<Recipe[]>([]);
 
-  // Load state from localStorage
+  // Load state from session/localStorage
   useEffect(() => {
-    const storedUser = localStorage.getItem('yotaste_user');
-    if (storedUser) {
+    const fetchMe = async () => {
       try {
-        const user = JSON.parse(storedUser);
-        setCurrentUser(user);
-        setIsPremium(user.isPremium || false);
+        const response = await fetch('/api/me');
+        if (response.ok) {
+          const user = await response.json();
+          setCurrentUser(user);
+          setIsPremium(user.isPremium || false);
+          localStorage.setItem('yotaste_user', JSON.stringify(user));
+        } else {
+          // Fallback to localStorage if not in session
+          const storedUser = localStorage.getItem('yotaste_user');
+          if (storedUser) {
+            const user = JSON.parse(storedUser);
+            setCurrentUser(user);
+            setIsPremium(user.isPremium || false);
+          }
+        }
       } catch (e) {
-        console.error("Failed to parse user from local storage");
+        console.error("Failed to fetch current user session");
       }
-    }
+    };
+
+    fetchMe();
 
     const storedFavorites = localStorage.getItem('yotaste_favorites');
     if (storedFavorites) setFavorites(JSON.parse(storedFavorites));
@@ -182,7 +195,7 @@ export default function App() {
     });
   };
 
-  const handleAuthSubmit = (e: React.FormEvent) => {
+  const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
 
@@ -191,42 +204,37 @@ export default function App() {
       return;
     }
 
-    if (authMode === 'register') {
-      const newUser: UserProfile = {
-        id: Math.random().toString(36).substring(2, 9),
-        name: authForm.name,
-        email: authForm.email,
-        isPremium: false,
-      };
-      localStorage.setItem('yotaste_user', JSON.stringify(newUser));
-      setCurrentUser(newUser);
-      setIsPremium(false);
-      setShowAuthModal(false);
-    } else {
-      // Fake login - just accept any email/password and create a mock user if it doesn't match a saved one perfectly
-      // In a real app, we'd verify credentials against a backend
-      const storedUserStr = localStorage.getItem('yotaste_user');
-      let userToLogin: UserProfile;
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: authForm.email,
+          name: authForm.name,
+          password: authForm.password // Although backend doesn't verify password yet
+        }),
+      });
 
-      if (storedUserStr) {
-        const storedUser = JSON.parse(storedUserStr);
-        if (storedUser.email === authForm.email) {
-          userToLogin = storedUser;
-        } else {
-          userToLogin = { id: '1', name: authForm.email.split('@')[0], email: authForm.email, isPremium: false };
-        }
+      if (response.ok) {
+        const user = await response.json();
+        localStorage.setItem('yotaste_user', JSON.stringify(user));
+        setCurrentUser(user);
+        setIsPremium(user.isPremium);
+        setShowAuthModal(false);
       } else {
-        userToLogin = { id: '1', name: authForm.email.split('@')[0], email: authForm.email, isPremium: false };
+        setAuthError('Přihlášení se nezdařilo.');
       }
-
-      localStorage.setItem('yotaste_user', JSON.stringify(userToLogin));
-      setCurrentUser(userToLogin);
-      setIsPremium(userToLogin.isPremium);
-      setShowAuthModal(false);
+    } catch (err) {
+      setAuthError('Chyba při komunikaci se serverem.');
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+    } catch (e) {
+      console.error("Logout failed on server");
+    }
     localStorage.removeItem('yotaste_user');
     setCurrentUser(null);
     setIsPremium(false);
@@ -249,20 +257,15 @@ export default function App() {
       if (data.url) {
         window.location.href = data.url;
         return;
+      } else {
+        alert('Chyba při vytváření platební relace.');
       }
     } catch (err) {
       console.error('Stripe error:', err);
+      alert('Chyba při komunikaci s platební bránou.');
     }
     
-    // Fallback if backend is not running or no URL
-    setIsPremium(true);
     setShowPremiumModal(false);
-    if (currentUser) {
-      const updatedUser = { ...currentUser, isPremium: true };
-      setCurrentUser(updatedUser);
-      localStorage.setItem('yotaste_user', JSON.stringify(updatedUser));
-    }
-    alert('Gratulujeme! Nyní máte Premium (simulováno).');
   };
 
   // Ad Timer Logic

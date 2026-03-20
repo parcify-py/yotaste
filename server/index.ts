@@ -1,4 +1,5 @@
 import express from 'express';
+import session from 'express-session';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import Stripe from 'stripe';
@@ -19,20 +20,121 @@ if (!stripeKey) {
 }
 const stripe = new Stripe(stripeKey || 'sk_test_mock');
 
-const app = express();
-app.use(express.json());
-app.use(cors());
-
-// Serve static files from the React build
-app.use(express.static(path.join(__dirname, '..', 'dist')));
-
 // Database setup
 const defaultData = { users: [], purchases: [] };
 const dbPath = process.env.DB_PATH || path.join(__dirname, 'db', 'db.json');
 const db = await JSONFilePreset(dbPath, defaultData);
 
+const app = express();
+
+// Webhook endpoint (must be BEFORE express.json())
+app.post('/api/webhook', express.raw({type: 'application/json'}), async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    let event;
+
+    try {
+        if (webhookSecret && sig) {
+            event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+        } else {
+            // Fallback for development/testing without webhook signing
+            event = req.body;
+        }
+    } catch (err: any) {
+        console.error(`Webhook Error: ${err.message}`);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    if (event.type === 'checkout.session.completed') {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const userId = session.metadata?.userId;
+
+        console.log(`Payment successful for user: ${userId}`);
+
+        // Update user in db
+        await db.update(({ users }: any) => {
+            const user = users.find((u: any) => u.id === userId);
+            if (user) {
+                user.isPremium = true;
+            } else {
+                // If user doesn't exist, create it (shouldn't happen in real app)
+                users.push({ id: userId, isPremium: true });
+            }
+        });
+    }
+
+    res.json({received: true});
+});
+
+app.use(express.json());
+app.use(cors());
+
+// Session setup
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'yo-taste-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+    }
+}));
+
+// Serve static files from the React build
+app.use(express.static(path.join(__dirname, '..', 'dist')));
+
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
+});
+
+// Login endpoint
+app.post('/api/login', async (req, res) => {
+    const { email, name } = req.body;
+    
+    if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Find or create user
+    let user = db.data.users.find((u: any) => u.email === email);
+    
+    if (!user) {
+        user = {
+            id: Math.random().toString(36).substring(2, 9),
+            name: name || email.split('@')[0],
+            email: email,
+            isPremium: false
+        };
+        await db.update(({ users }: any) => users.push(user));
+    }
+
+    // Save user to session
+    (req.session as any).user = user;
+    
+    res.json(user);
+});
+
+// Logout endpoint
+app.post('/api/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ error: 'Could not log out' });
+        }
+        res.json({ success: true });
+    });
+});
+
+// Get current user session
+app.get('/api/me', (req, res) => {
+    const user = (req.session as any).user;
+    if (user) {
+        // Refresh user data from DB to get latest premium status
+        const freshUser = db.data.users.find((u: any) => u.id === user.id);
+        res.json(freshUser || user);
+    } else {
+        res.status(401).json({ error: 'Not authenticated' });
+    }
 });
 
 // ... (other API endpoints)
@@ -69,8 +171,8 @@ app.post('/api/create-checkout-session', async (req, res) => {
                 },
             ],
             mode: 'subscription',
-            success_url: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/cancel`,
+            success_url: `http://localhost:8092/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `http://localhost:8092/cancel`,
             metadata: {
                 userId: userId,
             },
