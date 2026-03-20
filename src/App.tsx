@@ -3,6 +3,7 @@ import logo from '../img.png';
 import { GoogleGenAI, Type } from '@google/genai';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChefHat, Utensils, Clock, Flame, Search, Loader2, Store, AlertTriangle, CheckCircle2, ArrowRight, Play, X, ChevronRight, ChevronLeft, Leaf, Timer, Pause, RotateCcw, Crown, Star, Image as ImageIcon, User, LogOut, LogIn } from 'lucide-react';
+import { GoogleAd } from "./Ad"
 
 interface InstructionStep {
   text: string;
@@ -152,7 +153,7 @@ export default function App() {
     let interval: NodeJS.Timeout;
     if (isAdPlaying && adTimeLeft > 0) {
       interval = setInterval(() => {
-        setAdTimeLeft((prev) => prev - 1);
+        setAdTimeLeft(prev => prev - 1);
       }, 1000);
     } else if (isAdPlaying && adTimeLeft === 0) {
       setIsAdPlaying(false);
@@ -917,36 +918,13 @@ export default function App() {
 
       {/* Ad Modal */}
       <AnimatePresence>
-        {isAdPlaying && (
-          <div className="fixed inset-0 bg-stone-900/95 z-[200] flex flex-col items-center justify-center p-4 backdrop-blur-md">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="w-full max-w-2xl bg-white border-4 border-stone-900 rounded-3xl overflow-hidden shadow-[16px_16px_0px_0px_rgba(255,200,55,1)] flex flex-col"
-            >
-              <div className="p-4 bg-stone-100 border-b-4 border-stone-900 flex justify-between items-center">
-                <span className="font-bold text-stone-500 uppercase tracking-wider text-sm">Sponzorováno</span>
-                <div className="flex items-center gap-2 bg-stone-200 px-3 py-1 rounded-lg border-2 border-stone-300">
-                  <Timer className="w-4 h-4" />
-                  <span className="font-black font-mono">Reklama skončí za {adTimeLeft} s</span>
-                </div>
-              </div>
-              <div className="p-12 flex flex-col items-center justify-center text-center space-y-6 bg-[#f4f0ea]">
-                <div className="w-32 h-32 bg-stone-200 rounded-2xl border-4 border-stone-900 flex items-center justify-center animate-pulse">
-                  <ImageIcon className="w-12 h-12 text-stone-400" />
-                </div>
-                <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter">Kupte si náš super mixér 3000!</h2>
-                <p className="text-xl font-medium text-stone-600">Rozmixuje úplně všechno. I vaše problémy.</p>
-                <button 
-                  onClick={() => setShowPremiumModal(true)}
-                  className="mt-8 bg-[#ffc837] text-stone-900 px-6 py-4 rounded-xl font-black uppercase tracking-wider border-4 border-stone-900 shadow-[4px_4px_0px_0px_rgba(28,25,23,1)] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(28,25,23,1)] transition-all flex items-center gap-2"
-                >
-                  <Crown className="w-5 h-5" /> Odstranit reklamy (Premium)
-                </button>
-              </div>
-            </motion.div>
-          </div>
+        {/* Show Ad for free users before recipe */}
+        {isAdPlaying && pendingRecipe && !isPremium && (
+            <div className="max-w-4xl mx-auto bg-white border-4 border-stone-900 rounded-3xl shadow-[12px_12px_0px_0px_rgba(28,25,23,1)] p-8 text-center">
+              <p className="mb-4 font-bold text-lg">Recept se načte po 15s reklamě</p>
+              <p className="mb-6 font-medium text-stone-500">{adTimeLeft} s</p>
+              <GoogleAd />
+            </div>
         )}
       </AnimatePresence>
     </div>
