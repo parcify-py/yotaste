@@ -401,7 +401,9 @@ export default function App() {
           <div className="max-w-6xl mx-auto px-4 h-28 flex items-center justify-between relative">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <img src={logo} alt="YO, TASTE Logo" className="h-24 w-auto" />
+                <a href="/" className="hover:opacity-80 transition-opacity">
+                  <img src={logo} alt="YO, TASTE! - Logo aplikace pro domácí vaření" className="h-24 w-auto" />
+                </a>
               </div>
             </div>
 
@@ -838,6 +840,43 @@ export default function App() {
             )}
           </AnimatePresence>
         </main>
+        
+        <footer className="max-w-6xl mx-auto px-4 py-12 border-t-4 border-stone-900 mt-12">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="flex flex-col items-center md:items-start gap-4">
+              <img src={logo} alt="YO, TASTE! Logo" className="h-16 w-auto grayscale" />
+              <p className="text-stone-500 font-bold max-w-xs text-center md:text-left">
+                Vaše oblíbená jídla z restaurací, teď i u vás v kuchyni. S pomocí AI.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 text-sm font-black uppercase tracking-widest">
+              <div className="flex flex-col gap-3">
+                <span className="text-stone-400">Produkt</span>
+                <a href="#" className="hover:text-[#ff4e3a] transition-colors">Funkce</a>
+                <a href="#" onClick={() => setShowPremiumModal(true)} className="hover:text-[#ffc837] transition-colors">Premium</a>
+              </div>
+              <div className="flex flex-col gap-3">
+                <span className="text-stone-400">Komunita</span>
+                <a href="#" className="hover:text-[#ff4e3a] transition-colors">Instagram</a>
+                <a href="#" className="hover:text-[#ff4e3a] transition-colors">TikTok</a>
+              </div>
+              <div className="flex flex-col gap-3">
+                <span className="text-stone-400">Právní</span>
+                <a href="#" className="hover:text-stone-600 transition-colors">Soukromí</a>
+                <a href="#" className="hover:text-stone-600 transition-colors">Podmínky</a>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-12 pt-8 border-t-2 border-stone-200 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-bold text-stone-400 uppercase tracking-widest">
+            <span>© 2026 YO, TASTE! Všechna práva vyhrazena.</span>
+            <div className="flex items-center gap-6">
+              <span>Vyrobeno s ❤️ v Česku</span>
+              <a href="/sitemap.xml" className="hover:text-stone-900 transition-colors">Sitemap</a>
+            </div>
+          </div>
+        </footer>
 
         {/* Premium Modal */}
         <AnimatePresence>
