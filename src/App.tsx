@@ -240,7 +240,7 @@ export default function App() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          priceId: 'price_1QxY...', // Placeholder for real price ID
+          priceId: 'price_1TD21n0sQ2NihgRuuEO7WS6w', // Placeholder for real price ID
           userId: currentUser?.id || 'guest',
         }),
       });
@@ -1056,8 +1056,6 @@ export default function App() {
                         Akce!
                       </div>
                       <div className="text-sm font-bold text-stone-500 line-through">150 Kč / měsíc</div>
-                      <div className="text-4xl font-black text-stone-900 my-1">99 Kč</div>
-                      <div className="text-sm font-bold text-[#ff4e3a] uppercase tracking-wider">první měsíc!</div>
                     </div>
                     <button
                         onClick={handleBuyPremium}
