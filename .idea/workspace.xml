@@ -4,8 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="545b4a5e-29f4-4bee-b48c-3b68d3c2ddeb" name="Changes" comment="ads fix">
+    <list default="true" id="545b4a5e-29f4-4bee-b48c-3b68d3c2ddeb" name="Changes" comment="imgs">
+      <change beforePath="$PROJECT_DIR$/.dockerignore" beforeDir="false" afterPath="$PROJECT_DIR$/.dockerignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,13 +17,6 @@
   <component name="EmbeddingIndexingInfo">
     <option name="cachedIndexableFilesCount" value="98" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
-  </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="TypeScript JSX File" />
-      </list>
-    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -81,10 +76,10 @@
 }]]></component>
   <component name="RecapSpentCounter">
     <option name="endsOfQuotaMs" value="1775649620407" />
-    <option name="spentUsd" value="0.20430125" />
+    <option name="spentUsd" value="0.042209253" />
   </component>
   <component name="RecapUselessUpdatesCounter">
-    <option name="suspendCountdown" value="6" />
+    <option name="suspendCountdown" value="8" />
   </component>
   <component name="RunManager">
     <configuration default="true" type="Application" factoryName="Application">
@@ -159,7 +154,7 @@
       <option name="presentableId" value="Default" />
       <updated>1773968935232</updated>
       <workItem from="1773968936694" duration="2555000" />
-      <workItem from="1773971910980" duration="3557000" />
+      <workItem from="1773971910980" duration="1066000" />
     </task>
     <task id="LOCAL-00001" summary="docker">
       <option name="closed" value="true" />
@@ -185,39 +180,7 @@
       <option name="project" value="LOCAL" />
       <updated>1773972509769</updated>
     </task>
-    <task id="LOCAL-00004" summary="title">
-      <option name="closed" value="true" />
-      <created>1773972990947</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1773972990947</updated>
-    </task>
-    <task id="LOCAL-00005" summary="ads">
-      <option name="closed" value="true" />
-      <created>1773974008122</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1773974008122</updated>
-    </task>
-    <task id="LOCAL-00006" summary="ads">
-      <option name="closed" value="true" />
-      <created>1773974225648</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1773974225648</updated>
-    </task>
-    <task id="LOCAL-00007" summary="ads fix">
-      <option name="closed" value="true" />
-      <created>1773975112079</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1773975112079</updated>
-    </task>
-    <option name="localTasksCounter" value="8" />
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -237,9 +200,6 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="docker" />
     <MESSAGE value="imgs" />
-    <MESSAGE value="title" />
-    <MESSAGE value="ads" />
-    <MESSAGE value="ads fix" />
-    <option name="LAST_COMMIT_MESSAGE" value="ads fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="imgs" />
   </component>
 </project>
