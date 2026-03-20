@@ -1,0 +1,17 @@
+Index: docker-compose.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>services:\n  app:\n    build: .\n    ports:\n      - \"8080:80\"\n    environment:\n      - GEMINI_API_KEY=${GEMINI_API_KEY}\n    env_file:\n      - .env.local\n
+===================================================================
+diff --git a/docker-compose.yml b/docker-compose.yml
+--- a/docker-compose.yml	(revision 58787dc092e82bcd88390642d9fbcacc57def2b7)
++++ b/docker-compose.yml	(date 1773969741395)
+@@ -2,7 +2,7 @@
+   app:
+     build: .
+     ports:
+-      - "8080:80"
++      - "8092:80"
+     environment:
+       - GEMINI_API_KEY=${GEMINI_API_KEY}
+     env_file:
