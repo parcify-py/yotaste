@@ -42,6 +42,64 @@ interface UserProfile {
   isPremium: boolean;
 }
 
+interface FakeAd {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  color: string;
+  buttonColor: string;
+  pattern?: string;
+}
+
+const FAKE_ADS: FakeAd[] = [
+  {
+    id: 'blender',
+    title: 'Kupte si náš super mixér 3000!',
+    description: 'Rozmixuje úplně všechno. I vaše problémy.',
+    icon: <ChefHat className="w-16 h-16" />,
+    color: 'bg-[#ffc837]',
+    buttonColor: 'bg-[#ff4e3a]',
+    pattern: 'radial-gradient(#000 1px, transparent 1px)'
+  },
+  {
+    id: 'knives',
+    title: 'Nože, co řežou i čas!',
+    description: 'Sada profesionálních nožů pro ty, co nechtějí ztrácet vteřinu.',
+    icon: <Utensils className="w-16 h-16" />,
+    color: 'bg-[#4361ee]',
+    buttonColor: 'bg-[#ffc837]',
+    pattern: 'linear-gradient(45deg, #000 25%, transparent 25%, transparent 50%, #000 50%, #000 75%, transparent 75%, transparent)'
+  },
+  {
+    id: 'course',
+    title: 'Vařte jako michelinský šéf!',
+    description: 'Online kurz vaření pro úplná kopyta i pokročilé mistry.',
+    icon: <Flame className="w-16 h-16" />,
+    color: 'bg-[#c8f09d]',
+    buttonColor: 'bg-[#stone-900]',
+    pattern: 'repeating-conic-gradient(#000 0% 25%, transparent 0% 50%)'
+  },
+  {
+    id: 'eco-bags',
+    title: 'Nákupky, co vydrží věky.',
+    description: 'Stylové eko tašky z recyklovaných receptů.',
+    icon: <Leaf className="w-16 h-16" />,
+    color: 'bg-[#ff90e8]',
+    buttonColor: 'bg-[#4361ee]',
+    pattern: 'circle at 2px 2px, #000 1px, transparent 0'
+  },
+  {
+    id: 'spices',
+    title: 'Koření, co má grády!',
+    description: 'Exkluzivní směsi z celého světa přímo k vám domů.',
+    icon: <Flame className="w-16 h-16" />,
+    color: 'bg-[#ff4e3a]',
+    buttonColor: 'bg-[#ffc837]',
+    pattern: 'linear-gradient(90deg, #000 1px, transparent 0)'
+  }
+];
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<'restaurant' | 'idea'>('restaurant');
   const [restaurant, setRestaurant] = useState('');
@@ -71,6 +129,7 @@ export default function App() {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [isAdPlaying, setIsAdPlaying] = useState(false);
   const [adTimeLeft, setAdTimeLeft] = useState(15);
+  const [currentAd, setCurrentAd] = useState<FakeAd>(FAKE_ADS[0]);
   const [pendingRecipe, setPendingRecipe] = useState<Recipe | null>(null);
 
   // Load user from localStorage
@@ -324,6 +383,7 @@ export default function App() {
       } else {
         setPendingRecipe(data);
         setAdTimeLeft(15);
+        setCurrentAd(FAKE_ADS[Math.floor(Math.random() * FAKE_ADS.length)]);
         setIsAdPlaying(true);
       }
     } catch (err) {
@@ -920,30 +980,88 @@ export default function App() {
           {isAdPlaying && (
               <div className="fixed inset-0 bg-stone-900/95 z-[200] flex flex-col items-center justify-center p-4 backdrop-blur-md">
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className="w-full max-w-2xl bg-white border-4 border-stone-900 rounded-3xl overflow-hidden shadow-[16px_16px_0px_0px_rgba(255,200,55,1)] flex flex-col"
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                    className="w-full max-w-2xl bg-white border-4 border-stone-900 rounded-3xl overflow-hidden shadow-[16px_16px_0px_0px_rgba(28,25,23,1)] flex flex-col"
                 >
                   <div className="p-4 bg-stone-100 border-b-4 border-stone-900 flex justify-between items-center">
-                    <span className="font-bold text-stone-500 uppercase tracking-wider text-sm">Sponzorováno</span>
-                    <div className="flex items-center gap-2 bg-stone-200 px-3 py-1 rounded-lg border-2 border-stone-300">
-                      <Timer className="w-4 h-4" />
-                      <span className="font-black font-mono">Reklama skončí za {adTimeLeft} s</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500 border-2 border-stone-900" />
+                      <div className="w-3 h-3 rounded-full bg-yellow-500 border-2 border-stone-900" />
+                      <div className="w-3 h-3 rounded-full bg-green-500 border-2 border-stone-900" />
+                      <span className="font-black text-stone-500 uppercase tracking-widest text-xs ml-2">Sponzorováno</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 bg-stone-200 px-3 py-1.5 rounded-xl border-2 border-stone-900">
+                        <Timer className="w-4 h-4" />
+                        <span className="font-black font-mono text-lg">{adTimeLeft}s</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="p-12 flex flex-col items-center justify-center text-center space-y-6 bg-[#f4f0ea]">
-                    <div className="w-32 h-32 bg-stone-200 rounded-2xl border-4 border-stone-900 flex items-center justify-center animate-pulse">
-                      <ImageIcon className="w-12 h-12 text-stone-400" />
-                    </div>
-                    <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter">Kupte si náš super mixér 3000!</h2>
-                    <p className="text-xl font-medium text-stone-600">Rozmixuje úplně všechno. I vaše problémy.</p>
-                    <button
-                        onClick={() => setShowPremiumModal(true)}
-                        className="mt-8 bg-[#ffc837] text-stone-900 px-6 py-4 rounded-xl font-black uppercase tracking-wider border-4 border-stone-900 shadow-[4px_4px_0px_0px_rgba(28,25,23,1)] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(28,25,23,1)] transition-all flex items-center gap-2"
+
+                  <div className="relative w-full bg-stone-200 h-2">
+                    <motion.div
+                        initial={{ width: "100%" }}
+                        animate={{ width: `${(adTimeLeft / 15) * 100}%` }}
+                        transition={{ duration: 1, ease: "linear" }}
+                        className="absolute h-full bg-[#ffc837] border-r-2 border-stone-900"
+                    />
+                  </div>
+
+                  <div className={`p-10 sm:p-16 flex flex-col items-center justify-center text-center space-y-8 relative overflow-hidden`}>
+                    {/* Background Pattern */}
+                    <div
+                        className="absolute inset-0 opacity-5 pointer-events-none"
+                        style={{
+                          backgroundImage: currentAd.pattern,
+                          backgroundSize: '20px 20px'
+                        }}
+                    />
+
+                    <motion.div
+                        animate={{
+                          rotate: [0, -5, 5, -5, 0],
+                          scale: [1, 1.05, 1, 1.05, 1]
+                        }}
+                        transition={{
+                          duration: 4,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                        className={`w-32 h-32 ${currentAd.color} rounded-2xl border-4 border-stone-900 flex items-center justify-center shadow-[8px_8px_0px_0px_rgba(28,25,23,1)] z-10`}
                     >
-                      <Crown className="w-5 h-5" /> Odstranit reklamy (Premium)
-                    </button>
+                      {currentAd.icon}
+                    </motion.div>
+
+                    <div className="space-y-4 z-10">
+                      <h2 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter leading-none">
+                        {currentAd.title}
+                      </h2>
+                      <p className="text-xl sm:text-2xl font-bold text-stone-600 max-w-md mx-auto">
+                        {currentAd.description}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md z-10 pt-4">
+                      <button
+                          className={`${currentAd.buttonColor} text-stone-900 flex-1 px-8 py-5 rounded-2xl font-black uppercase tracking-widest border-4 border-stone-900 shadow-[6px_6px_0px_0px_rgba(28,25,23,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all text-lg`}
+                      >
+                        Koupit hned!
+                      </button>
+                      <button
+                          onClick={() => setShowPremiumModal(true)}
+                          className="bg-white text-stone-900 px-6 py-5 rounded-2xl font-black uppercase tracking-widest border-4 border-stone-900 shadow-[6px_6px_0px_0px_rgba(28,25,23,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-2"
+                      >
+                        <Crown className="w-5 h-5" /> Bez reklam
+                      </button>
+                    </div>
+
+                    <div className="pt-4 z-10">
+                      <span className="text-stone-400 font-bold text-xs uppercase tracking-widest bg-stone-100 px-3 py-1 rounded-full border border-stone-200">
+                        Podporujete vývoj YO, TASTE!
+                      </span>
+                    </div>
                   </div>
                 </motion.div>
               </div>
