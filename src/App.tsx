@@ -3,6 +3,7 @@ import logo from '../img.png';
 import { GoogleGenAI, Type } from '@google/genai';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChefHat, Utensils, Clock, Flame, Search, Loader2, Store, AlertTriangle, CheckCircle2, ArrowRight, Play, X, ChevronRight, ChevronLeft, Leaf, Timer, Pause, RotateCcw, Crown, Star, Image as ImageIcon, User, LogOut, LogIn } from 'lucide-react';
+import { GoogleAd } from "./Ad"
 
 interface InstructionStep {
   text: string;
