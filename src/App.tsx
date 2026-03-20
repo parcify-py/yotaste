@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GoogleGenAI, Type } from '@google/genai';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChefHat, Utensils, Clock, Flame, Search, Loader2, Store, AlertTriangle, CheckCircle2, ArrowRight, Play, X, ChevronRight, ChevronLeft, Leaf, Timer, Pause, RotateCcw, Crown, Star, Image as ImageIcon } from 'lucide-react';
+import { ChefHat, Utensils, Clock, Flame, Search, Loader2, Store, AlertTriangle, CheckCircle2, ArrowRight, Play, X, ChevronRight, ChevronLeft, Leaf, Timer, Pause, RotateCcw, Crown, Star, Image as ImageIcon, User, LogOut, LogIn } from 'lucide-react';
 
 interface InstructionStep {
   text: string;
@@ -34,6 +34,13 @@ interface MenuItem {
   homeCookingPrice: number;
 }
 
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  isPremium: boolean;
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<'restaurant' | 'idea'>('restaurant');
   const [restaurant, setRestaurant] = useState('');
@@ -51,12 +58,93 @@ export default function App() {
   const [timerSeconds, setTimerSeconds] = useState<number | null>(null);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
+  // Auth State
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' });
+  const [authError, setAuthError] = useState('');
+
   // Premium & Ad State
   const [isPremium, setIsPremium] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [isAdPlaying, setIsAdPlaying] = useState(false);
   const [adTimeLeft, setAdTimeLeft] = useState(15);
   const [pendingRecipe, setPendingRecipe] = useState<Recipe | null>(null);
+
+  // Load user from localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem('yotaste_user');
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setCurrentUser(user);
+        setIsPremium(user.isPremium || false);
+      } catch (e) {
+        console.error("Failed to parse user from local storage");
+      }
+    }
+  }, []);
+
+  const handleAuthSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+
+    if (!authForm.email || !authForm.password || (authMode === 'register' && !authForm.name)) {
+      setAuthError('Vyplňte prosím všechna pole.');
+      return;
+    }
+
+    if (authMode === 'register') {
+      const newUser: UserProfile = {
+        id: Math.random().toString(36).substring(2, 9),
+        name: authForm.name,
+        email: authForm.email,
+        isPremium: false,
+      };
+      localStorage.setItem('yotaste_user', JSON.stringify(newUser));
+      setCurrentUser(newUser);
+      setIsPremium(false);
+      setShowAuthModal(false);
+    } else {
+      // Fake login - just accept any email/password and create a mock user if it doesn't match a saved one perfectly
+      // In a real app, we'd verify credentials against a backend
+      const storedUserStr = localStorage.getItem('yotaste_user');
+      let userToLogin: UserProfile;
+      
+      if (storedUserStr) {
+        const storedUser = JSON.parse(storedUserStr);
+        if (storedUser.email === authForm.email) {
+          userToLogin = storedUser;
+        } else {
+          userToLogin = { id: '1', name: authForm.email.split('@')[0], email: authForm.email, isPremium: false };
+        }
+      } else {
+        userToLogin = { id: '1', name: authForm.email.split('@')[0], email: authForm.email, isPremium: false };
+      }
+      
+      localStorage.setItem('yotaste_user', JSON.stringify(userToLogin));
+      setCurrentUser(userToLogin);
+      setIsPremium(userToLogin.isPremium);
+      setShowAuthModal(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('yotaste_user');
+    setCurrentUser(null);
+    setIsPremium(false);
+  };
+
+  const handleBuyPremium = () => {
+    setIsPremium(true);
+    setShowPremiumModal(false);
+    if (currentUser) {
+      const updatedUser = { ...currentUser, isPremium: true };
+      setCurrentUser(updatedUser);
+      localStorage.setItem('yotaste_user', JSON.stringify(updatedUser));
+    }
+  };
 
   // Ad Timer Logic
   useEffect(() => {
@@ -264,15 +352,47 @@ export default function App() {
             </div>
           </div>
           
-          {!isPremium && (
-            <button
-              onClick={() => setShowPremiumModal(true)}
-              className="bg-[#ffc837] text-stone-900 px-4 py-3 sm:px-6 sm:py-3 rounded-xl border-4 border-stone-900 shadow-[4px_4px_0px_0px_rgba(28,25,23,1)] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(28,25,23,1)] flex items-center gap-2 font-black transition-all"
-            >
-              <Crown className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="hidden sm:inline uppercase tracking-wider">Premium</span>
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            {!isPremium && (
+              <button
+                onClick={() => setShowPremiumModal(true)}
+                className="bg-[#ffc837] text-stone-900 px-3 py-2 sm:px-4 sm:py-3 rounded-xl border-4 border-stone-900 shadow-[4px_4px_0px_0px_rgba(28,25,23,1)] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(28,25,23,1)] flex items-center gap-2 font-black transition-all"
+              >
+                <Crown className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="hidden sm:inline uppercase tracking-wider">Premium</span>
+              </button>
+            )}
+
+            {currentUser ? (
+              <div className="flex items-center gap-3 bg-white border-4 border-stone-900 rounded-xl p-2 shadow-[4px_4px_0px_0px_rgba(28,25,23,1)]">
+                <div className="hidden sm:flex flex-col items-end px-2">
+                  <span className="font-black text-sm uppercase leading-none">{currentUser.name}</span>
+                  <span className="font-bold text-xs text-stone-500">{currentUser.isPremium ? 'Premium' : 'Free'}</span>
+                </div>
+                <div className="w-10 h-10 bg-stone-200 rounded-lg border-2 border-stone-900 flex items-center justify-center">
+                  <User className="w-5 h-5 text-stone-600" />
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 hover:bg-stone-100 rounded-lg transition-colors border-2 border-transparent hover:border-stone-900"
+                  title="Odhlásit se"
+                >
+                  <LogOut className="w-5 h-5 text-stone-600" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  setAuthMode('login');
+                  setShowAuthModal(true);
+                }}
+                className="bg-stone-900 text-white px-4 py-3 rounded-xl border-4 border-stone-900 shadow-[4px_4px_0px_0px_rgba(255,78,58,1)] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(255,78,58,1)] flex items-center gap-2 font-black transition-all uppercase tracking-wider"
+              >
+                <LogIn className="w-5 h-5" />
+                <span className="hidden sm:inline">Přihlásit se</span>
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -702,14 +822,100 @@ export default function App() {
                   <div className="text-sm font-bold text-[#ff4e3a] uppercase tracking-wider">první měsíc!</div>
                 </div>
                 <button 
-                  onClick={() => {
-                    setIsPremium(true);
-                    setShowPremiumModal(false);
-                  }}
+                  onClick={handleBuyPremium}
                   className="w-full bg-stone-900 text-white px-8 py-4 rounded-xl font-black uppercase tracking-wider hover:bg-stone-800 transition-colors shadow-[4px_4px_0px_0px_rgba(255,78,58,1)] hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(255,78,58,1)]"
                 >
                   Koupit Premium
                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Auth Modal */}
+      <AnimatePresence>
+        {showAuthModal && (
+          <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white border-4 border-stone-900 rounded-3xl shadow-[16px_16px_0px_0px_rgba(28,25,23,1)] w-full max-w-md overflow-hidden flex flex-col relative"
+            >
+              <button 
+                onClick={() => setShowAuthModal(false)} 
+                className="absolute top-4 right-4 hover:bg-stone-100 p-2 rounded-xl transition-colors border-2 border-transparent hover:border-stone-900 z-10"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <div className="p-8 text-center bg-stone-100 border-b-4 border-stone-900">
+                <div className="w-16 h-16 bg-stone-900 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                  <User className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-3xl font-black uppercase tracking-tighter">
+                  {authMode === 'login' ? 'Přihlášení' : 'Registrace'}
+                </h2>
+              </div>
+              <div className="p-8">
+                {authError && (
+                  <div className="mb-6 p-4 bg-red-100 border-2 border-red-500 rounded-xl text-red-700 font-bold flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5" />
+                    {authError}
+                  </div>
+                )}
+                <form onSubmit={handleAuthSubmit} className="space-y-4">
+                  {authMode === 'register' && (
+                    <div>
+                      <label className="block text-sm font-black uppercase tracking-wider mb-2">Jméno</label>
+                      <input
+                        type="text"
+                        value={authForm.name}
+                        onChange={(e) => setAuthForm({ ...authForm, name: e.target.value })}
+                        className="w-full px-4 py-3 rounded-xl border-2 border-stone-900 bg-stone-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#ffc837]/50 font-medium transition-all"
+                        placeholder="Vaše jméno"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-sm font-black uppercase tracking-wider mb-2">Email</label>
+                    <input
+                      type="email"
+                      value={authForm.email}
+                      onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border-2 border-stone-900 bg-stone-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#ffc837]/50 font-medium transition-all"
+                      placeholder="vas@email.cz"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-black uppercase tracking-wider mb-2">Heslo</label>
+                    <input
+                      type="password"
+                      value={authForm.password}
+                      onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border-2 border-stone-900 bg-stone-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#ffc837]/50 font-medium transition-all"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                  <button 
+                    type="submit"
+                    className="w-full bg-[#ff4e3a] text-white px-8 py-4 rounded-xl font-black uppercase tracking-wider hover:bg-[#e03e2a] transition-colors shadow-[4px_4px_0px_0px_rgba(28,25,23,1)] hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(28,25,23,1)] mt-4 border-2 border-stone-900"
+                  >
+                    {authMode === 'login' ? 'Přihlásit se' : 'Zaregistrovat se'}
+                  </button>
+                </form>
+                <div className="mt-6 text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMode(authMode === 'login' ? 'register' : 'login');
+                      setAuthError('');
+                    }}
+                    className="text-stone-500 hover:text-stone-900 font-bold underline decoration-2 underline-offset-4 transition-colors"
+                  >
+                    {authMode === 'login' ? 'Nemáte účet? Zaregistrujte se' : 'Již máte účet? Přihlaste se'}
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>

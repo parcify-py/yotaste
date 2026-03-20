@@ -18,15 +18,3 @@ View your app in AI Studio: https://ai.studio/apps/bd64f61e-bdd6-483d-81e4-fbd8a
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
-
-## Run with Docker
-
-You can run the application in a Docker container using the provided `Dockerfile` and `docker-compose.yml`.
-
-1. Ensure you have Docker installed.
-2. Set the `GEMINI_API_KEY` in `.env.local`.
-3. Build and run the container:
-   ```bash
-   docker-compose up --build
-   ```
-4. Access the application at `http://localhost:8080`.
