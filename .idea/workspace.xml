@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="545b4a5e-29f4-4bee-b48c-3b68d3c2ddeb" name="Changes" comment="seo+">
+    <list default="true" id="545b4a5e-29f4-4bee-b48c-3b68d3c2ddeb" name="Changes" comment="smth idfk">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -219,7 +217,15 @@
       <option name="project" value="LOCAL" />
       <updated>1773978031460</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="smth idfk">
+      <option name="closed" value="true" />
+      <created>1774004864302</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1774004864302</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -244,6 +250,7 @@
     <MESSAGE value="new fake ads" />
     <MESSAGE value="seo" />
     <MESSAGE value="seo+" />
-    <option name="LAST_COMMIT_MESSAGE" value="seo+" />
+    <MESSAGE value="smth idfk" />
+    <option name="LAST_COMMIT_MESSAGE" value="smth idfk" />
   </component>
 </project>

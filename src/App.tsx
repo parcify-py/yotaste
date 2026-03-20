@@ -232,7 +232,29 @@ export default function App() {
     setIsPremium(false);
   };
 
-  const handleBuyPremium = () => {
+  const handleBuyPremium = async () => {
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          priceId: 'price_1QxY...', // Placeholder for real price ID
+          userId: currentUser?.id || 'guest',
+        }),
+      });
+
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+    } catch (err) {
+      console.error('Stripe error:', err);
+    }
+    
+    // Fallback if backend is not running or no URL
     setIsPremium(true);
     setShowPremiumModal(false);
     if (currentUser) {
@@ -240,6 +262,7 @@ export default function App() {
       setCurrentUser(updatedUser);
       localStorage.setItem('yotaste_user', JSON.stringify(updatedUser));
     }
+    alert('Gratulujeme! Nyní máte Premium (simulováno).');
   };
 
   // Ad Timer Logic

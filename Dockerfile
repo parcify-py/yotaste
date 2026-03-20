@@ -11,13 +11,25 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Use Nginx to serve the static files
-FROM nginx:stable-alpine
+# Final stage
+FROM node:20-slim
 
-# Copy the built files from the previous stage
-COPY --from=build /app/dist /usr/share/nginx/html
+WORKDIR /app
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/server ./server
+COPY --from=build /app/node_modules ./node_modules
 
-# Expose port 80
-EXPOSE 80
+# Create db directory
+RUN mkdir -p /app/server/db
 
-CMD ["nginx", "-g", "daemon off;"]
+# Environment variables
+ENV PORT=3001
+ENV DB_PATH=/app/server/db/db.json
+ENV FRONTEND_URL=http://localhost:8092
+
+# Expose backend port
+EXPOSE 3001
+
+# Run the server
+CMD ["npm", "run", "server"]

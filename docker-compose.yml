@@ -2,8 +2,11 @@ services:
   app:
     build: .
     ports:
-      - "8092:80"
+      - "8092:3001"
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+    volumes:
+      - ./server/db:/app/server/db
     env_file:
       - .env.local
