@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import logo from '../img.png';
 import { GoogleGenAI, Type } from '@google/genai';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChefHat, Utensils, Clock, Flame, Search, Loader2, Store, AlertTriangle, CheckCircle2, ArrowRight, Play, X, ChevronRight, ChevronLeft, Leaf, Timer, Pause, RotateCcw, Crown, Star, Image as ImageIcon, User, LogOut, LogIn } from 'lucide-react';
+import { ChefHat, Utensils, Clock, Flame, Search, Loader2, Store, AlertTriangle, CheckCircle2, ArrowRight, Play, X, ChevronRight, ChevronLeft, Leaf, Timer, Pause, RotateCcw, Crown, Star, Image as ImageIcon, User, LogOut, LogIn, Heart, History, Share2, Facebook, Twitter, Mail } from 'lucide-react';
 
 interface InstructionStep {
   text: string;
@@ -132,7 +132,11 @@ export default function App() {
   const [currentAd, setCurrentAd] = useState<FakeAd>(FAKE_ADS[0]);
   const [pendingRecipe, setPendingRecipe] = useState<Recipe | null>(null);
 
-  // Load user from localStorage
+  // Persistence: Favorites & History
+  const [favorites, setFavorites] = useState<Recipe[]>([]);
+  const [history, setHistory] = useState<Recipe[]>([]);
+
+  // Load state from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem('yotaste_user');
     if (storedUser) {
@@ -144,7 +148,39 @@ export default function App() {
         console.error("Failed to parse user from local storage");
       }
     }
+
+    const storedFavorites = localStorage.getItem('yotaste_favorites');
+    if (storedFavorites) setFavorites(JSON.parse(storedFavorites));
+
+    const storedHistory = localStorage.getItem('yotaste_history');
+    if (storedHistory) setHistory(JSON.parse(storedHistory));
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('yotaste_favorites', JSON.stringify(favorites));
+  }, [favorites]);
+
+  useEffect(() => {
+    localStorage.setItem('yotaste_history', JSON.stringify(history));
+  }, [history]);
+
+  const toggleFavorite = (recipe: Recipe) => {
+    setFavorites(prev => {
+      const isFav = prev.some(f => f.title === recipe.title);
+      if (isFav) {
+        return prev.filter(f => f.title !== recipe.title);
+      } else {
+        return [recipe, ...prev].slice(0, 20); // Keep top 20
+      }
+    });
+  };
+
+  const addToHistory = (recipe: Recipe) => {
+    setHistory(prev => {
+      const filtered = prev.filter(h => h.title !== recipe.title);
+      return [recipe, ...filtered].slice(0, 10); // Keep top 10
+    });
+  };
 
   const handleAuthSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -217,6 +253,7 @@ export default function App() {
       setIsAdPlaying(false);
       if (pendingRecipe) {
         setRecipe(pendingRecipe);
+        addToHistory(pendingRecipe);
         setPendingRecipe(null);
       }
     }
@@ -380,6 +417,7 @@ export default function App() {
 
       if (isPremium) {
         setRecipe(data);
+        addToHistory(data);
       } else {
         setPendingRecipe(data);
         setAdTimeLeft(15);
@@ -557,6 +595,60 @@ export default function App() {
             </div>
           </div>
 
+          {/* History & Favorites Section */}
+          {(history.length > 0 || favorites.length > 0) && !menu.length && !recipe && (
+              <div className="mb-20 space-y-16">
+                {favorites.length > 0 && (
+                    <section>
+                      <div className="flex items-center gap-3 mb-8 border-b-4 border-stone-900 pb-4">
+                        <Heart className="w-8 h-8 text-[#ff4e3a] fill-current" />
+                        <h2 className="text-3xl font-black uppercase tracking-tighter">Oblíbené recepty</h2>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {favorites.map((fav, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setRecipe(fav)}
+                                className="bg-white border-4 border-stone-900 p-6 rounded-2xl shadow-[8px_8px_0px_0px_rgba(28,25,23,1)] hover:translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(28,25,23,1)] transition-all text-left group"
+                            >
+                              <div className="flex justify-between items-start mb-4">
+                                <span className="text-xs font-black uppercase tracking-widest bg-[#ffc837] px-2 py-1 rounded border-2 border-stone-900 shadow-[2px_2px_0px_0px_rgba(28,25,23,1)]">Recept</span>
+                                <Heart className="w-5 h-5 text-[#ff4e3a] fill-current" />
+                              </div>
+                              <h3 className="font-black text-xl group-hover:text-[#ff4e3a] transition-colors line-clamp-2">{fav.title}</h3>
+                              <div className="mt-4 flex gap-3 text-xs font-bold text-stone-500">
+                                <span>🔥 {fav.calories}</span>
+                                <span>⏱️ {fav.prepTime}</span>
+                              </div>
+                            </button>
+                        ))}
+                      </div>
+                    </section>
+                )}
+
+                {history.length > 0 && (
+                    <section>
+                      <div className="flex items-center gap-3 mb-8 border-b-4 border-stone-900 pb-4">
+                        <History className="w-8 h-8 text-stone-400" />
+                        <h2 className="text-3xl font-black uppercase tracking-tighter text-stone-600">Naposledy hledané</h2>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {history.map((hist, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setRecipe(hist)}
+                                className="bg-stone-50 border-2 border-stone-900 p-4 rounded-xl hover:bg-white transition-colors text-left group shadow-[4px_4px_0px_0px_rgba(28,25,23,1)]"
+                            >
+                              <h3 className="font-bold text-stone-900 group-hover:text-[#ff4e3a] transition-colors truncate">{hist.title}</h3>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mt-1">Zobrazit znovu</p>
+                            </button>
+                        ))}
+                      </div>
+                    </section>
+                )}
+              </div>
+          )}
+
           {error && (
               <div className="max-w-3xl mx-auto mb-12 bg-red-50 border-2 border-red-500 text-red-700 p-6 rounded-xl flex items-center gap-4 font-bold shadow-[4px_4px_0px_0px_rgba(239,68,68,1)]">
                 <AlertTriangle className="w-6 h-6 shrink-0" />
@@ -652,9 +744,35 @@ export default function App() {
               >
                 <div className="bg-white border-4 border-stone-900 rounded-3xl shadow-[12px_12px_0px_0px_rgba(28,25,23,1)] overflow-hidden">
                   <div className="p-6 sm:p-8 md:p-12 border-b-4 border-stone-900 bg-[#ffc837]">
-                    <h2 className="text-3xl sm:text-5xl md:text-6xl font-black uppercase tracking-tighter mb-6 sm:mb-8 leading-none">
-                      {recipe.title}
-                    </h2>
+                    <div className="flex flex-wrap items-center justify-between gap-6 mb-8">
+                      <h2 className="text-3xl sm:text-5xl md:text-6xl font-black uppercase tracking-tighter leading-none flex-1">
+                        {recipe.title}
+                      </h2>
+                      <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => toggleFavorite(recipe)}
+                            className={`p-4 rounded-2xl border-4 border-stone-900 shadow-[6px_6px_0px_0px_rgba(28,25,23,1)] transition-all hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(28,25,23,1)] ${
+                                favorites.some(f => f.title === recipe.title) ? 'bg-[#ff4e3a] text-white' : 'bg-white text-stone-900'
+                            }`}
+                            title={favorites.some(f => f.title === recipe.title) ? "Odebrat z oblíbených" : "Přidat do oblíbených"}
+                        >
+                          <Heart className={`w-6 h-6 ${favorites.some(f => f.title === recipe.title) ? 'fill-current' : ''}`} />
+                        </button>
+                        <div className="relative group">
+                          <button
+                              className="p-4 rounded-2xl border-4 border-stone-900 shadow-[6px_6px_0px_0px_rgba(28,25,23,1)] transition-all hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(28,25,23,1)] bg-white text-stone-900"
+                              title="Sdílet recept"
+                          >
+                            <Share2 className="w-6 h-6" />
+                          </button>
+                          <div className="absolute right-0 top-full mt-4 bg-white border-4 border-stone-900 rounded-2xl p-3 shadow-[8px_8px_0px_0px_rgba(28,25,23,1)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 flex gap-2">
+                            <button className="p-2 hover:bg-blue-100 rounded-xl transition-colors text-blue-600"><Facebook className="w-6 h-6" /></button>
+                            <button className="p-2 hover:bg-sky-100 rounded-xl transition-colors text-sky-500"><Twitter className="w-6 h-6" /></button>
+                            <button className="p-2 hover:bg-stone-100 rounded-xl transition-colors text-stone-600"><Mail className="w-6 h-6" /></button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
                     <div className="flex flex-wrap gap-3 sm:gap-4">
                       <div className="flex items-center gap-2 sm:gap-3 bg-white px-4 py-2 sm:px-5 sm:py-3 rounded-xl border-2 border-stone-900 font-bold shadow-[2px_2px_0px_0px_rgba(28,25,23,1)] text-sm sm:text-base">
@@ -853,18 +971,23 @@ export default function App() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 text-sm font-black uppercase tracking-widest">
               <div className="flex flex-col gap-3">
                 <span className="text-stone-400">Produkt</span>
-                <a href="#" className="hover:text-[#ff4e3a] transition-colors">Funkce</a>
-                <a href="#" onClick={() => setShowPremiumModal(true)} className="hover:text-[#ffc837] transition-colors">Premium</a>
+                <a href="/" className="hover:text-[#ff4e3a] transition-colors">Hlavní stránka</a>
+                <a href="#" className="hover:text-[#ff4e3a] transition-colors">Jak to funguje</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setShowPremiumModal(true); }} className="hover:text-[#ffc837] transition-colors flex items-center gap-1">
+                  <Crown className="w-4 h-4" /> Premium
+                </a>
               </div>
               <div className="flex flex-col gap-3">
                 <span className="text-stone-400">Komunita</span>
-                <a href="#" className="hover:text-[#ff4e3a] transition-colors">Instagram</a>
+                <a href="https://www.instagram.com/yo.taste.official/" target="_blank" rel="noopener noreferrer" className="hover:text-[#ff4e3a] transition-colors">Instagram</a>
                 <a href="#" className="hover:text-[#ff4e3a] transition-colors">TikTok</a>
+                <a href="mailto:yo.taste.official@gmail.com" className="hover:text-[#ff4e3a] transition-colors">Kontakt</a>
               </div>
               <div className="flex flex-col gap-3">
                 <span className="text-stone-400">Právní</span>
-                <a href="#" className="hover:text-stone-600 transition-colors">Soukromí</a>
-                <a href="#" className="hover:text-stone-600 transition-colors">Podmínky</a>
+                <a href="#" className="hover:text-stone-600 transition-colors">Ochrana soukromí</a>
+                <a href="#" className="hover:text-stone-600 transition-colors">Obchodní podmínky</a>
+                <a href="#" className="hover:text-stone-600 transition-colors">Cookies</a>
               </div>
             </div>
           </div>
